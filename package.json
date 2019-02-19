@@ -1,0 +1,9 @@
+{
+  "name": "qmarkdn",
+  "version": "0.1.0",
+  "description": "quick hack to format markdown my way",
+  "license": "Apache-2.0",
+
+  "scripts": {
+  }
+}

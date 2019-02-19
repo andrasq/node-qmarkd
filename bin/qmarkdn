@@ -1,0 +1,372 @@
+#!/usr/bin/env node
+
+/*
+ * qmarkdn -- quick and dirty simplified markdown, with some extensions.
+ * A quick hack, to format like the way I would do it by hand.
+ *
+ * Copyright (C) 2019 Andras Radics.
+ * Licensed under the Apache License, Version 2.0
+ *
+ * 2019-02-18 - AR.
+ */
+
+'use strict';
+
+var VERSION = '0.1.0';
+
+Error.stackTraceLimit = 4;
+
+var fs = require('fs');
+var util = require('util');
+
+var arg, argv = process.argv.slice(2);
+var userOptions = {};
+while (argv.length > 0) {
+    if (argv[0][0] !== '-') break;
+    if (argv[0] === '--') { argv.shift(); break; }
+    switch ((arg = argv.shift())) {
+    case '-h': case '--help':
+        console.log("qmarkdn %s -- quick and dirty simplified markdown", VERSION);
+        console.log("usage: qmarkdn FILENAME");
+        return;
+    case '-O': case '--options':
+        userOptions = JSON.parse(argv.shift());
+        break;
+    default:
+        console.log("%s: unrecognized option", arg);
+        process.exit(2);
+    }
+}
+
+// TODO: read file from stdin instead
+if (!argv[0]) {
+    console.log("usage: qmarkdn FILENAME");
+    process.exit(1);
+}
+
+var ST_NONE = '';
+var ST_LIST = 'list'                    // bullet or numbered list
+var ST_VERBATIM = 'verbatim';           // ``` code block
+var ST_CODE = 'code';                   // 4+ space indented code
+var ST_TABLE = 'table';                 // | ... | tabular data
+
+// TODO: move settings into options
+// var options = copyObject(defaultOptions, userOptions);
+// var defaultOptions = { ...
+var tablewidth = '800pt';
+var cellpadding = '20pt';
+var fontface = 'sans-serif';
+var hrule = '<hr width=100% size=1 noshade>'
+var codeStart = '<p><table cellpadding=20 cellspacing=0 border=0 bgcolor=#f6f8fa width="100%"><tr><td><pre>';
+var codeEnd = '</pre></td></tr></table><p>';
+var ttStart = '<code>';
+var ttEnd = '</code>';
+// ... }
+
+var doc = fs.readFileSync(argv[0]).toString();
+var output = markdown(doc);
+process.stdout.write(output.join('\n') + '\n');
+
+
+function markdown( doc, stream ) {
+    var lines = doc.split('\n');
+    var output = [];
+    var nextLine;
+
+    // current parsing state
+    var state = ST_NONE;                // state
+    var isOrderedList = false;          // substate
+    var tableRowFormats = [];
+
+    output.push(
+        util.format(
+            '<html><body bgcolor=white fg=black><table width="%s" cellpadding="%s"><tr><td><font face="%s">',
+            tablewidth, cellpadding, fontface
+        )
+    );
+
+    // return the next line from lines, and set nextLine
+    function getNextLine() {
+        var line = lines.shift();
+        nextLine = lines[0] || '';
+        return line;
+    }
+
+    while (lines.length > 0) {
+        var lastLine = line;
+        var line = getNextLine();
+
+        if (/^```/.test(line)) {
+            if (state === ST_VERBATIM) {
+                output.push(codeEnd);
+                state = ST_NONE;
+            } else {
+                output.push(codeStart);
+                state = ST_VERBATIM;
+            }
+            continue;
+        }
+        if (state === ST_VERBATIM) {
+            output.push(escapeHtml(line));
+            continue;
+        }
+
+        // indented lines are typeset as code, with the first 4 indent levels removed
+        // Code blocks are output verbatim, without styling.
+        if (isIndentedCode(line)) {
+            if (state === ST_LIST) {
+                // indented list contents are not special
+                output.push(line.replace(/^\s+/, '  '));
+                continue;
+            }
+            if (state !== ST_CODE) {
+                output.push(codeStart);
+                state = ST_CODE;
+            }
+            // remove leading 4 spaces of indent
+            output.push(escapeHtml(line.slice(4)));
+            continue;
+        }
+
+        // first un-indented line ends code mode
+        if (state === ST_CODE) {
+            // TODO: support a single contained blank line
+            output.push(codeEnd);
+            state = ST_NONE;
+        }
+
+        // line break handling, it can also affect state
+        if (line === '') {
+            // test for just a horizontal rule
+            if (/^===|^---/.test(nextLine)) {
+                output.push(hrule);
+                lines.shift();
+                continue;
+            }
+            if (state === ST_TABLE) {
+                output.push('></table></center>');
+                state = ST_NONE;
+                continue;
+            }
+            if (state === ST_CODE) {
+                // a single blank line does not exit sample mode
+                if (isIndentedCode(nextLine)) {
+                    output.push('');
+                } else {
+                    output.push(codeEnd);
+                    state = ST_NONE;
+                }
+                continue;
+            }
+            if (state == ST_LIST) {
+                if (!isListItem(nextLine) && !isspace(nextLine[0])) {
+                    output.push(isOrderedList ? '</ol>' : '</ul>');
+                    state = ST_NONE;
+                } else {
+                    output.push('<p>');
+                }
+                continue;
+            }
+            if (output[output.length - 1] !== '<p>') {
+                output.push('');
+                output.push('<p>');
+            }
+            continue;
+        }
+
+        if (/^\|/.test(line) || (/[^\\]\|/.test(line) && /---/.test(nextLine))) {
+            formatTableRow(line);
+            continue;
+        }
+
+        if (/^===/.test(nextLine)) { line = '# ' + line; getNextLine() }
+        if (/^---/.test(nextLine)) { line = '## ' + line; getNextLine() }
+
+        line = styleLine(line);
+        formatLine(line, output);
+    }
+
+    if (state == ST_LIST) output.push(isOrderedList ? '</ol>' : '</ul>');
+
+    output.push('</font></td></tr></table></body></html>');
+    return output;
+
+
+    function formatTableRow( line ) {
+        var headings, formats;
+        if (/^\s*[|]?[\s:]*---/.test(nextLine)) formats = getNextLine();
+        if (formats || /^\|\|/.test(line)) headings = line;
+        if (state !== ST_TABLE) {
+            tableRowFormats = formats ? parseTableFormats(formatTableCells(formats)) : [];
+            output.push(util.format('<center><table width="auto" padding=10 cellpadding=5 cellspacing=0 border=0 bgcolor="#f6f8fa"'));
+            if (headings) output.push('><tr align=left>' + formatTableCells(line, tableRowFormats, 'th').join('') + '</tr');
+            else output.push('><tr align=left>' + formatTableCells(line, tableRowFormats, 'td').join('') + '</tr');
+            state = ST_TABLE;
+        }
+        else {
+            output.push('><tr align=left>' + formatTableCells(line, tableRowFormats, 'td').join('') + '</tr');
+        }
+    }
+
+    function formatTableCells( line, formats, type ) {
+        line = line.trim().replace(/([^|]|^)[|][|]([^|]|$)/g, '$1|$2');
+        if (line[0] === '|') line = line.slice(1);
+        if (line[line.length - 1] === '|') line = line.slice(0, -1);
+
+        var columns = line.split('|');
+        // style the contents of each cell
+        for (var i=0; i<columns.length; i++) {
+            columns[i] = styleLine(columns[i]);
+        }
+        // if formats provided, wrap the cell contents in html
+        if (formats) for (var i=0; i<columns.length; i++) {
+            type = type || 'td';
+            columns[i] = util.format('<%s %s>%s</%s>', type, formats[i] || '', columns[i], type);
+        }
+        return columns;
+    }
+
+    function parseTableFormats( cells ) {
+        for (var i=0; i<cells.length; i++) {
+            var format = cells[i].trim(), left = false, right = false;
+            if (format[0] === ':') left = true;
+            if (format[format.length - 1] === ':') right = true;
+            cells[i] = (left && right) ? 'align=center' : right ? 'align=right' : '';
+        }
+        return cells;
+    }
+
+    function styleLine( line ) {
+
+        // embedded emails and urls
+        if (line.indexOf('@') > 0) {
+            // TODO: make email obfuscation configurable
+            line = line.replace(/(([a-zA-Z0-9_.]+)@([^\s,]+))/g, '<a href="mailto:">$2 (at) $3</a>');
+        }
+        if (/\.(net|com|org|edu)\//.test(line)) {
+            // TODO: make clickable link generation configurable
+            // TODO: allow [...](...) mardown-style links
+            line = line.replace(/([^\s,]+\.(net|com|org|edu)[/][^\s,]*)/g, function(match) {
+                var url = (match.indexOf('://') < 0) ? 'http://' + match : match;
+                return util.format('<a href="%s">%s</a>', url, match);
+            })
+        }
+
+        // font styling
+        line = doBold(line);
+        line = doItalics(line);
+        line = doCode(line);
+        // TODO: underline, strikethrough
+
+        return line;
+    }
+
+    // TODO: split up handling by line type
+    function formatLine( line, output ) {
+
+        // nroff-style dot escapes, with some extensions
+        if (line[0] === '.') {
+                 if (/^\.BR$/.test(line)) line = '<br>';
+            else if (/^\.B /.test(line))  line = '<b>' +    line.slice(3) + '</b>';
+            else if (/^\.I /.test(line))  line = '<i>' +    line.slice(3) + '</i>';
+            else if (/^\.BI /.test(line)) line = '<b><i>' + line.slice(4) + '</i></b>';
+            else if (/^\.U /.test(line))  line = '<u>' +    line.slice(3) + '</u>';
+            else if (/^\.S /.test(line))  line = '<s>' +    line.slice(3) + '</s>';
+            else if (/^\.TT /.test(line)) line = ttStart +  escapeHtml(line.slice(4)) + ttEnd;
+            else if (/^\.LINK /.test(line) || /^\.A /.test(line)) {
+                var parts = /^\.[A-Z]* ([^\s]*) *(.*)$/.exec(line);
+                line = parts ? util.format('<a href="%s">%s</a>', parts[1], parts[2] || parts[1]) : '';
+            }
+            output.push(line);
+            return;
+        }
+
+        // # heading levels
+        if (/^#/.test(line)) {
+                 if (/^# /.test(line)) output.push('<h1>' + line.slice(2) + '</h1>');
+            else if (/^## /.test(line)) output.push('<h2>' + line.slice(3) + '</h2>');
+            else if (/^### /.test(line)) output.push('<h3>' + line.slice(4) + '</h3>');
+            else if (/^#### /.test(line)) output.push('<h4>' + line.slice(5) + '</h4>');
+            else if (/^##### /.test(line)) output.push('<h5>' + line.slice(6) + '</h5>');
+            return;
+        }
+
+        // lines ending in two trailing spaces insert a line break
+        if (line[line.length - 1] === ' ' && line[line.length - 2] === ' ' && state !== ST_CODE && state !== ST_VERBATIM) line += '<br>';
+
+// TODO: the below is no longer visal aspects formatting...
+
+        // unordered lists can be started with * + -, ordered lists with 1. 2. etc
+        if (isListItem(line)) {
+            if (state !== ST_LIST) {
+                isOrderedList = /^\s*[\d]+\.\s/.test(line);
+                output.push(isOrderedList ? '<ol>' : '<ul>');
+                state = ST_LIST;
+            }
+            output.push('<li>');
+            output.push(line.replace(/^\s*(\d+\.|[*+-])\s/, '  '));
+            // TODO: count indetation, support nested item lists
+            // TODO: allow list items to contain blank lines
+            return;
+        }
+
+        // generic line in vanilla paragraph mode
+        output.push(line);
+    }
+}
+
+function isListItem( line ) { return /^\s*([*+-]|\d+\.)\s/.test(line) }
+function isIndentedCode( line ) { return /^\s{4,}[^\s]/.test(line) }
+
+
+// NOTE: this is not the github markdown notation, *b*, __u__ and --s-- are ours
+function doBold( line ) { line = _doBold(line, '**', '<b>', '</b>'); return _doBold(line, '*', '<b>', '</b>') }
+function doItalics( line ) { return _doBold(line, '_', '<i>', '</i>') }
+function doUnderline( line ) { return _doBold(line, '__', '<u>', '</u>') }
+function doStrikethrough( line ) { return _doBold(line, '~~', '<s>', '</s>') }
+// FIXME: ` escapes should ignore enclosed other markup, eg `*p++ = 2* 3`
+//function doCode( line ) { return _doBold(line, '`', '<font bgcolor=#f6f8fa color=black><code>', '</code></font>') }
+function doCode( line ) { return _doBold(line, '`', ttStart, ttEnd) }
+
+// surround the text delimited by patt with the start/stop markup
+function _doBold( line, pattBold, startBold, stopBold ) {
+    var output = '';
+    var pattLen = pattBold.length;
+
+// TODO: handle \-escapes for eg `\``
+    while (line.length > 0) {
+        var mark = 0;
+        do { mark = line.indexOf(pattBold, mark) } while (mark >= 0 && !(isspace(line[mark-1]) && !isspace(line[mark+pattLen])) && (mark += pattLen));
+        if (mark < 0) return output + line;
+
+        var end = mark + pattLen;
+        do { end = line.indexOf(pattBold, end) } while (mark >= 0 && !(!isspace(line[end-1]) && isspace(line[end+pattLen])) && (end += pattLen));
+        if (end < 0) return output + line;
+
+//console.log("AR: patt %s in", pattBold, line, mark, end);
+        if (end - mark < 1) return output + line;
+
+        output += line.slice(0, mark) + startBold + escapeHtml(line.slice(mark+pattLen, end)) + stopBold;
+        line = line.slice(end + pattLen);
+    }
+
+    return output + line;
+}
+
+function escapeHtml( str ) {
+    if (str.indexOf('&')) str = str.replace(/&/g, '&amp;');
+    if (str.indexOf('<')) str = str.replace(/</g, '&lt;');
+    return str;
+}
+
+// test for delimiting whitespace
+function isspace( ch ) { return ch === '\n' || ch === ' ' || ch === '\t' || ch === undefined }
+
+
+// FIXME: list items containing blank lines (ie, end list on two blank lines)
+// FIXME: using non-standard bold markup (single star bolds, not itals)
+
+function copyObject( target, src ) {
+    for (var k in src) target[k] = src[k];
+    return target;
+}
