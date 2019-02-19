@@ -50,17 +50,22 @@ var ST_VERBATIM = 'verbatim';           // ``` code block
 var ST_CODE = 'code';                   // 4+ space indented code
 var ST_TABLE = 'table';                 // | ... | tabular data
 
+// TODO: --readme option to format like github readme, else format more like plaintext
 // TODO: move settings into options
 // var options = copyObject(defaultOptions, userOptions);
 // var defaultOptions = { ...
 var tablewidth = '800pt';
 var cellpadding = '20pt';
-var fontface = 'sans-serif';
+var docstyle =
+    'tt { background-color:#f4f4f5; font-size:80%; padding:0.2em 0.4em; border-radius: 3px; }\n ' +
+    '';
+var fontface = 'Helvetica,Arial,sans-serif';
+var fontstyle = 'font-size:12pt; line-height:1.3;';
 var hrule = '<hr width=100% size=1 noshade>'
-var codeStart = '<p><table cellpadding=20 cellspacing=0 border=0 bgcolor=#f6f8fa width="100%"><tr><td><pre>';
+var codeStart = '<p><table cellpadding=20 cellspacing=0 border=0 bgcolor=#f6f8fa width="100%" style="font-size:80%; line-height:1.5; padding:0.2em 0.4em;"><tr><td><pre>';
 var codeEnd = '</pre></td></tr></table><p>';
-var ttStart = '<code>';
-var ttEnd = '</code>';
+var ttStart = '<tt>';
+var ttEnd = '</tt>';
 // ... }
 
 var doc = fs.readFileSync(argv[0]).toString();
@@ -80,8 +85,9 @@ function markdown( doc, stream ) {
 
     output.push(
         util.format(
-            '<html><body bgcolor=white fg=black><table width="%s" cellpadding="%s"><tr><td><font face="%s">',
-            tablewidth, cellpadding, fontface
+            '<html><head><style type="text/css">%s</style></head>' +
+            '<body bgcolor=white fg=black><table width="%s" cellpadding="%s"><tr><td><font face="%s" style="%s">',
+            docstyle, tablewidth, cellpadding, fontface, fontstyle
         )
     );
 
@@ -325,7 +331,6 @@ function doItalics( line ) { return _doBold(line, '_', '<i>', '</i>') }
 function doUnderline( line ) { return _doBold(line, '__', '<u>', '</u>') }
 function doStrikethrough( line ) { return _doBold(line, '~~', '<s>', '</s>') }
 // FIXME: ` escapes should ignore enclosed other markup, eg `*p++ = 2* 3`
-//function doCode( line ) { return _doBold(line, '`', '<font bgcolor=#f6f8fa color=black><code>', '</code></font>') }
 function doCode( line ) { return _doBold(line, '`', ttStart, ttEnd) }
 
 // surround the text delimited by patt with the start/stop markup

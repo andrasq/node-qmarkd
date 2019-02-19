@@ -4,7 +4,7 @@ qmarkdn
 Quick little hack to format markup kind of like markdown, rather like github, but with some
 small differences.  It's a little abridged and a little warped compared to markdown.
 
-*WORK IN PROGRESS*
+**WORK IN PROGRESS**
 
 The syntax currently is slightly different from github, but it works the way I like it.  It
 also has some extensions brought over from another tool of mine.  This is a work in progress
