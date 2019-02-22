@@ -347,11 +347,11 @@ function _doBold( line, pattBold, startBold, stopBold ) {
 // TODO: handle \-escapes for eg `\``
     while (line.length > 0) {
         var mark = 0;
-        do { mark = line.indexOf(pattBold, mark) } while (mark >= 0 && !(isspace(line[mark-1]) && !isspace(line[mark+pattLen])) && (mark += pattLen));
+        do { mark = line.indexOf(pattBold, mark) } while (mark >= 0 && !(isspace(line[mark-1]) && !isEndBound(line[mark+pattLen])) && (mark += pattLen));
         if (mark < 0) return output + line;
 
         var end = mark + pattLen;
-        do { end = line.indexOf(pattBold, end) } while (mark >= 0 && !(!isspace(line[end-1]) && isspace(line[end+pattLen])) && (end += pattLen));
+        do { end = line.indexOf(pattBold, end) } while (mark >= 0 && !(!isspace(line[end-1]) && isEndBound(line[end+pattLen])) && (end += pattLen));
         if (end < 0) return output + line;
 
 //console.log("AR: patt %s in", pattBold, line, mark, end);
@@ -377,6 +377,7 @@ function escapeCode( str ) {
 
 // test for delimiting whitespace
 function isspace( ch ) { return ch === '\n' || ch === ' ' || ch === '\t' || ch === undefined }
+function isEndBound(ch) { return ch === undefined || /[\s,.;:!()\[\]]/.test(ch) }
 
 
 // FIXME: list items containing blank lines (ie, end list on two blank lines)
