@@ -146,7 +146,7 @@ function markdown( doc, stream ) {
             // test for just a horizontal rule
             if (/^===|^---/.test(nextLine)) {
                 output.push(hrule);
-                lines.shift();
+                getNextLine();
                 continue;
             }
             if (state === ST_TABLE) {
@@ -185,6 +185,7 @@ function markdown( doc, stream ) {
             continue;
         }
 
+        // TODO: also emit the <hr> if in github --readme mode, else skip like here
         if (/^===/.test(nextLine)) { line = '# ' + line; getNextLine() }
         if (/^---/.test(nextLine)) { line = '## ' + line; getNextLine() }
 
@@ -279,6 +280,7 @@ function markdown( doc, stream ) {
             else if (/^\.U /.test(line))  line = '<u>' +    line.slice(3) + '</u>';
             else if (/^\.S /.test(line))  line = '<s>' +    line.slice(3) + '</s>';
             else if (/^\.TT /.test(line)) line = ttStart +  escapeHtml(line.slice(4)) + ttEnd;
+            else if (/^\.P$|^\.PP$/.test(line)) line = '<p>';
             else if (/^\.LINK /.test(line) || /^\.A /.test(line)) {
                 var parts = /^\.[A-Z]* ([^\s]*) *(.*)$/.exec(line);
                 line = parts ? util.format('<a href="%s">%s</a>', parts[1], parts[2] || parts[1]) : '';
@@ -330,8 +332,12 @@ function doBold( line ) { line = _doBold(line, '**', '<b>', '</b>'); return _doB
 function doItalics( line ) { return _doBold(line, '_', '<i>', '</i>') }
 function doUnderline( line ) { return _doBold(line, '__', '<u>', '</u>') }
 function doStrikethrough( line ) { return _doBold(line, '~~', '<s>', '</s>') }
-// FIXME: ` escapes should ignore enclosed other markup, eg `*p++ = 2* 3`
-function doCode( line ) { return _doBold(line, '`', ttStart, ttEnd) }
+function doCode( line ) {
+    return line.replace(/(``?([^`]|\\[`])*`?`)/g, function(str) {
+        var s = escapeCode('<tt>' + str.slice(1, -1) + '</tt>');
+        return s;
+    })
+}
 
 // surround the text delimited by patt with the start/stop markup
 function _doBold( line, pattBold, startBold, stopBold ) {
