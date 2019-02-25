@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "quick hack to format markdown my way",
   "license": "Apache-2.0",
+  "keywords": ["markdown", "marked", "document", "format"],
+  "readme": "see README.md in the repo",
+  "author": "andrasq",
 
   "scripts": {
   }

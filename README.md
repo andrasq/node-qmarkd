@@ -1,7 +1,7 @@
 qmarkdn
 =======
 
-Quick little hack to format markup kind of like markdown, rather like github, but with some
+Quick little hack to format markup kind of like markdown, visually like github, but with some
 small differences.  It's a little abridged and a little warped compared to markdown.
 
 **WORK IN PROGRESS**
