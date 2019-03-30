@@ -1,14 +1,20 @@
 qmarkdn
 =======
 
-Quick little hack to format markup kind of like markdown, visually like github, but with some
+Quick little cli tool to format markup kind of like markdown, visually like github, but with some
 small differences.  It's a little abridged and a little warped compared to markdown.
 
-**WORK IN PROGRESS**
+This started out as two-hour hack to apply some simple formatting my document; since then
+it's been minor bugfixes; oh, and tables support.
+
+This is a work in progress.  It has rough edges, but is usable.
 
 The syntax currently is slightly different from github, but it works the way I like it.  It
 also has some extensions brought over from another tool of mine.  This is a work in progress
 and may change as I add/alter features or change my mind.
+
+
+    $ qmarkdn README.md > out.html
 
 
 Installing
