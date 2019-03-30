@@ -7,7 +7,8 @@ small differences.  It's a little abridged and a little warped compared to markd
 This started out as two-hour hack to apply some simple formatting my document; since then
 it's been minor bugfixes; oh, and tables support.
 
-This is a work in progress.  It has rough edges, but is usable.
+This is a work in progress.  It has rough edges, but is usable.  It's compatible enough
+with github markdown to render a reasonably close likeness of most README files.
 
 The syntax currently is slightly different from github, but it works the way I like it.  It
 also has some extensions brought over from another tool of mine.  This is a work in progress
