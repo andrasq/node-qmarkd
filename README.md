@@ -54,6 +54,12 @@ Differences
 - `* *` is bold, not Italic
 
 
+Todo
+----
+
+- fix blank lines in multi-paragraph code blocks
+- add support for `>` quoted text
+
 Related Work
 ------------
 
