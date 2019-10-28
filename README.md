@@ -59,6 +59,7 @@ Todo
 
 - fix blank lines in multi-paragraph code blocks
 - add support for `>` quoted text
+- maybe add support for `[...]` links
 
 Related Work
 ------------
