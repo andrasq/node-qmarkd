@@ -39,12 +39,13 @@ Features
 --------
 
 - bold `* *`, Italics `_ _`, teletype `` ``
-- `h1 .. h5` headers
+- `# .. ####` h1-h5 headers
 - code blocks
 - bullet lists, numbered lists
 - obfuscated email links
 - url links
 - `.I, .B` etc nroff-style markup
+- `||` `|` limited tables support (no escaping)
 
 
 Differences
