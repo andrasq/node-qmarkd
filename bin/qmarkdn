@@ -253,9 +253,24 @@ function markdown( doc, stream ) {
 
     function styleLine( line ) {
 
+        // replace embedded github-style []() urls and images, e.g.
+        // [![Build Status](https://travis-ci.org/andrasq/node-minisql.svg?branch=master)](https://travis-ci.org/andrasq/node-minisql)
+        var match;
+        while ((match = line.match(/^(.*)\[([^\[\]]*)\]\(([^\(\)]*)\)(.*)$/))) {
+            var isImage = match[1].trim().slice(-2) === '[!';
+            line = (isImage ? match[1].trim().slice(0, -1) : match[1]) + embedUrl(isImage, match[2], match[3]) + match[4];
+        }
+        function embedUrl(imageFlag, alt, url) {
+            var source = imageFlag ? util.format('<img src="%s" alt="%s">', url, alt)
+                : util.format('<a href="%s">%s</a>', url, alt);
+            return source;
+        }
+
         // embedded emails and urls
+        /** 2020-12-12: do not auto-expand, require the []() notation
         if (line.indexOf('@') > 0) {
             // TODO: make email obfuscation configurable
+            // TODO: make it more selective, eg qmarkdn@0.1.2 will trip it
             line = line.replace(/(([a-zA-Z0-9_.]+)@([^\s,]+))/g, '<a href="mailto:">$2 (at) $3</a>');
         }
         if (/\.(net|com|org|edu)\//.test(line)) {
@@ -266,6 +281,7 @@ function markdown( doc, stream ) {
                 return util.format('<a href="%s">%s</a>', url, match);
             })
         }
+        **/
 
         // font styling
         line = doBold(line);

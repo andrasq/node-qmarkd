@@ -1,6 +1,6 @@
 {
   "name": "qmarkdn",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "quick hack to format markdown my way",
   "license": "Apache-2.0",
   "keywords": ["markdown", "marked", "document", "format"],

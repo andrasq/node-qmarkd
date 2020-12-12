@@ -58,6 +58,7 @@ Differences
 Changelog
 ---------
 
+- 0.2.0 - handle embedded []() images and urls, stop auto-expanding urls and email addresses
 - 0.1.3 - `--version` switch
 - 0.1.2 - support blank lines in code blocks
 
