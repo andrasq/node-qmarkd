@@ -4,7 +4,7 @@
  * qmarkdn -- quick and dirty simplified markdown, with some extensions.
  * A quick hack, to format like the way I would do it by hand.
  *
- * Copyright (C) 2019 Andras Radics.
+ * Copyright (C) 2019-2020 Andras Radics.
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-02-18 - AR.
@@ -12,7 +12,7 @@
 
 'use strict';
 
-var VERSION = '0.1.0';
+var VERSION = '0.1.1';
 
 Error.stackTraceLimit = 4;
 
@@ -139,9 +139,8 @@ function markdown( doc, stream ) {
             continue;
         }
 
-        // first un-indented line ends code mode
-        if (state === ST_CODE) {
-            // TODO: support a single contained blank line
+        // first un-indented line ends code mode, unless just a blank line followed by more code
+        if (state === ST_CODE && (line || !isIndentedCode(nextLine))) {
             output.push(codeEnd);
             state = ST_NONE;
         }

@@ -54,12 +54,18 @@ Differences
 - `* *` is bold, not Italic
 
 
+Changelog
+---------
+
+- 0.1.2 - support blank lines in code blocks
+
+
 Todo
 ----
 
-- fix blank lines in multi-paragraph code blocks
 - add support for `>` quoted text
 - maybe add support for `[...]` links
+
 
 Related Work
 ------------
