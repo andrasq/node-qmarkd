@@ -57,6 +57,7 @@ Differences
 Changelog
 ---------
 
+- 0.1.3 - `--version` switch
 - 0.1.2 - support blank lines in code blocks
 
 
