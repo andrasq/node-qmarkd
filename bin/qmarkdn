@@ -355,7 +355,7 @@ function _doBold( line, pattBold, startBold, stopBold ) {
 // TODO: handle \-escapes for eg `\``
     while (line.length > 0) {
         var mark = 0;
-        do { mark = line.indexOf(pattBold, mark) } while (mark >= 0 && !(isspace(line[mark-1]) && !isEndBound(line[mark+pattLen])) && (mark += pattLen));
+        do { mark = line.indexOf(pattBold, mark) } while (mark >= 0 && !(isspace(line[mark-1]) && !isStartBound(line[mark+pattLen])) && (mark += pattLen));
         if (mark < 0) return output + line;
 
         var end = mark + pattLen;
@@ -385,6 +385,9 @@ function escapeCode( str ) {
 
 // test for delimiting whitespace
 function isspace( ch ) { return ch === '\n' || ch === ' ' || ch === '\t' || ch === undefined }
+// isStartBound flags invalid marked-up substrings starts, primarily leading spaces
+function isStartBound(ch) { return ch === undefined || /[\s,;(\. )]/.test(ch) }
+// isEndBound checks that the marked-up substring ends at a plausiable boundary, eg end of word or at punctuation
 function isEndBound(ch) { return ch === undefined || /[\s,.;:!()\[\]]/.test(ch) }
 
 
