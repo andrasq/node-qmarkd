@@ -67,7 +67,6 @@ Todo
 ----
 
 - add support for `>` quoted text
-- maybe add support for `[...]` links
 
 
 Related Work

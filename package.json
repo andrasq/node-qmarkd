@@ -1,9 +1,9 @@
 {
   "name": "qmarkdn",
   "version": "0.2.0",
-  "description": "quick hack to format markdown my way",
+  "description": "simple github-like markdown formatter",
   "license": "Apache-2.0",
-  "keywords": ["markdown", "marked", "document", "format"],
+  "keywords": ["markdown", "marked", "document", "github", "readme", "format"],
   "readme": "see README.md in the repo",
   "author": "andrasq",
 
