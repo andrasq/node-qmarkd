@@ -66,7 +66,7 @@ var docstyle = '\n' +
 var fontface = 'Arial,Helvetica,sans-serif';
 var fontstyle = 'font-size: 16px; 12pt; line-height: 1.5;';
 var hrule = '<hr width=100% size=1 noshade>'
-var codeStart = '<p><table cellpadding=10 cellspacing=4 border=1 bgcolor=#f6f8fa width="100%" style="font-size:80%; line-height:1.5; padding:0.2em 0.4em;"><tr><td><pre>';
+var codeStart = '<p><table cellpadding=16 cellspacing=4 border=1 bgcolor=#f6f8fa width="100%" style="line-height:1.4; padding:0.2em 0.4em;"><tr><td><pre style="font-size:10.2pt">';
 var codeEnd = '</pre></td></tr></table><p>';
 var ttStart = '<tt>';
 var ttEnd = '</tt>';
