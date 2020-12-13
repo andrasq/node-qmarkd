@@ -1,6 +1,6 @@
 {
   "name": "qmarkdn",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "simple github-like markdown formatter",
   "license": "Apache-2.0",
   "keywords": ["markdown", "marked", "document", "github", "readme", "format"],
