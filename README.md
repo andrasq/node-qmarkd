@@ -58,7 +58,7 @@ Differences
 Changelog
 ---------
 
-- 0.2.2 - try to add anchors to the section headings, better invalid option wording
+- 0.2.2 - try to add anchors to the section headings, better invalid option wording, `-fa` option
 - 0.2.1 - fix program `--version`
 - 0.2.0 - handle embedded []() images and urls, stop auto-expanding urls and email addresses
 - 0.1.3 - `--version` switch

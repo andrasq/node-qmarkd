@@ -21,16 +21,20 @@ var util = require('util');
 
 var arg, argv = process.argv.slice(2);
 var userOptions = {};
+var fontface = 'Helvetica,Arial,sans-serif';
 while (argv.length > 0) {
     if (argv[0][0] !== '-') break;
     if (argv[0] === '--') { argv.shift(); break; }
     switch ((arg = argv.shift())) {
     case '-h': case '--help': case '--version':
         console.log("qmarkdn %s -- quick and dirty simplified markdown", VERSION);
-        console.log("usage: qmarkdn FILENAME");
+        console.log("usage: qmarkdn [-fa FONT] FILENAME");
         return;
     case '-O': case '--options':
         userOptions = JSON.parse(argv.shift());
+        break;
+    case '-fa': case '--font':
+        fontface = argv.shift();
         break;
     default:
         console.log("%s: invalid option", arg);
@@ -57,13 +61,12 @@ var ST_TABLE = 'table';                 // | ... | tabular data
 var tablewidth = '800pt';
 var cellpadding = '20pt';
 var docstyle = '\n' +
-    'body { font-family: Helvetica,Arial,sans-serif; font-size: 16px; } \n' +
+    'body { font-family: ' + fontface + '; font-size: 16px; } \n' +
     'tt { background-color:#f4f4f5; font-size:85%; padding:0.2em 0.4em; border-radius: 3px; } \n' +
     'table { border-collapse: collapse; } \n' +
     'table table th { border: 1px solid #DFE2E5; xpadding 6px 13px; font-weight 600; font-size: 12pt; } \n' +
     'table table td { border: 1px solid #DFE2E5; xpadding: 6px 13px; font-size: 11pt; } \n' +
     '';
-var fontface = 'Arial,Helvetica,sans-serif';
 var fontstyle = 'font-size: 16px; 12pt; line-height: 1.5;';
 var hrule = '<hr width=100% size=1 noshade>'
 var codeStyle = 'font-size:14px; line-height:1.4;';
