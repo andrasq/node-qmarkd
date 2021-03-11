@@ -12,7 +12,7 @@
 
 'use strict';
 
-var VERSION = '0.2.1';
+var VERSION = '0.2.2';
 
 Error.stackTraceLimit = 4;
 
@@ -33,7 +33,7 @@ while (argv.length > 0) {
         userOptions = JSON.parse(argv.shift());
         break;
     default:
-        console.log("%s: unrecognized option", arg);
+        console.log("%s: invalid option", arg);
         process.exit(2);
     }
 }
@@ -293,6 +293,12 @@ function markdown( doc, stream ) {
         return line;
     }
 
+    function makeHeading( type, line ) {
+        // mimic the github anchor names, a poor format but compatible
+        var name = line.toLowerCase().replace(/ +/g, '-').replace(/[^-a-z0-9]+/g, '');
+        return '<a name="#' + name + '" href="#' + name + '"></a><' + type + '>' + line + '</' + type + '>';
+    }
+
     // TODO: split up handling by line type
     function formatLine( line, output ) {
 
@@ -316,11 +322,11 @@ function markdown( doc, stream ) {
 
         // # heading levels
         if (/^#/.test(line)) {
-                 if (/^# /.test(line)) output.push('<h1>' + line.slice(2) + '</h1>');
-            else if (/^## /.test(line)) output.push('<h2>' + line.slice(3) + '</h2>');
-            else if (/^### /.test(line)) output.push('<h3>' + line.slice(4) + '</h3>');
-            else if (/^#### /.test(line)) output.push('<h4>' + line.slice(5) + '</h4>');
-            else if (/^##### /.test(line)) output.push('<h5>' + line.slice(6) + '</h5>');
+                 if (/^# /.test(line)) output.push(makeHeading('h1', line.slice(2)));
+            else if (/^## /.test(line)) output.push(makeHeading('h2', line.slice(3)));
+            else if (/^### /.test(line)) output.push(makeHeading('h3', line.slice(4)));
+            else if (/^#### /.test(line)) output.push(makeHeading('h4', line.slice(5)));
+            else if (/^##### /.test(line)) output.push(makeHeading('h5', line.slice(6)));
             return;
         }
 
