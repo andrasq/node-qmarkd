@@ -38,8 +38,8 @@ into a directory on your `$PATH`, and make the file executable.
 Features
 --------
 
-- bold `* *`, Italics `_ _`, teletype `` ``
-- `# .. ####` h1-h5 headers
+- bold `* *`, Italics `_ _`, typewriter `` ``
+- `# .. #####` h1-h5 headers
 - code blocks
 - bullet lists, numbered lists
 - obfuscated email links
@@ -58,6 +58,8 @@ Differences
 Changelog
 ---------
 
+- 0.2.2 - try to add anchors to the section headings, better invalid option wording
+- 0.2.1 - fix program `--version`
 - 0.2.0 - handle embedded []() images and urls, stop auto-expanding urls and email addresses
 - 0.1.3 - `--version` switch
 - 0.1.2 - support blank lines in code blocks
