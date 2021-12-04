@@ -4,7 +4,7 @@
  * qmarkdn -- quick and dirty simplified markdown, with some extensions.
  * A quick hack, to format like the way I would do it by hand.
  *
- * Copyright (C) 2019-2020 Andras Radics.
+ * Copyright (C) 2019-2021 Andras Radics.
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-02-18 - AR.
@@ -12,7 +12,7 @@
 
 'use strict';
 
-var VERSION = '0.2.2';
+var VERSION = '0.2.3';
 
 Error.stackTraceLimit = 4;
 
@@ -174,7 +174,7 @@ function markdown( doc, stream ) {
                 continue;
             }
             if (state == ST_LIST) {
-                if (!isListItem(nextLine) && !isspace(nextLine[0])) {
+                if (!isListItem(nextLine) && (!nextLine || !isspace(nextLine[0]))) {
                     output.push(isOrderedList ? '</ol>' : '</ul>');
                     state = ST_NONE;
                 } else {
