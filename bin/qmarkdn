@@ -126,6 +126,11 @@ function markdown( doc, stream ) {
             continue;
         }
 
+        if (/^===|^---/.test(line)) {
+            output.push(hrule);
+            continue;
+        }
+
         // indented lines are typeset as code, with the first 4 indent levels removed
         // Code blocks are output verbatim, without styling.
         if (isIndentedCode(line)) {
@@ -152,7 +157,8 @@ function markdown( doc, stream ) {
         // line break handling, it can also affect state
         if (line === '') {
             // test for just a horizontal rule
-            if (/^===|^---/.test(nextLine)) {
+            // FIXME: this is now done at top-level above, no need for it here
+            if (0 && /^===|^---/.test(nextLine)) {
                 output.push(hrule);
                 getNextLine();
                 continue;
