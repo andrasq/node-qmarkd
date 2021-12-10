@@ -136,6 +136,7 @@ function markdown( doc, stream ) {
         if (isIndentedCode(line)) {
             if (state === ST_LIST) {
                 // indented list contents are not special
+                line = styleLine(line);
                 output.push(line.replace(/^\s+/, '  '));
                 continue;
             }
