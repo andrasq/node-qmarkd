@@ -12,7 +12,7 @@
 
 'use strict';
 
-var VERSION = '0.2.3';
+var VERSION = '0.2.4';
 
 Error.stackTraceLimit = 4;
 
@@ -159,6 +159,7 @@ function markdown( doc, stream ) {
             }
             if (state === ST_TABLE) {
                 output.push('></table></center>');
+                output.push('', '<p>');
                 tableRowNumber = 0;
                 state = ST_NONE;
                 continue;
@@ -169,6 +170,7 @@ function markdown( doc, stream ) {
                     output.push('');
                 } else {
                     output.push(codeEnd);
+                    output.push('', '<p>');
                     state = ST_NONE;
                 }
                 continue;
