@@ -58,6 +58,8 @@ Differences
 Changelog
 ---------
 
+- 0.2.4 - fix table and code transitions, apply styling inside bullet lists
+- 0.2.3 - fix bullet list transition
 - 0.2.2 - try to add anchors to the section headings, better invalid option wording, `-fa` option
 - 0.2.1 - fix program `--version`
 - 0.2.0 - handle embedded []() images and urls, stop auto-expanding urls and email addresses

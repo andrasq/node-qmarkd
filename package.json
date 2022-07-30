@@ -1,12 +1,11 @@
 {
   "name": "qmarkdn",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "simple github-like markdown formatter",
   "license": "Apache-2.0",
   "keywords": ["markdown", "marked", "document", "github", "readme", "format"],
   "readme": "see README.md in the repo",
   "author": "andrasq",
 
-  "scripts": {
-  }
+  "bin": { "qmarkdn": "./bin/qmarkdn" }
 }
