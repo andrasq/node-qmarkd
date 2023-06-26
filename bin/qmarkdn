@@ -12,7 +12,7 @@
 
 'use strict';
 
-var VERSION = '0.2.4';
+var VERSION = '0.2.5';
 
 Error.stackTraceLimit = 4;
 
@@ -308,7 +308,7 @@ function markdown( doc, stream ) {
     function makeHeading( type, line ) {
         // mimic the github anchor names, a poor format but compatible
         var name = line.toLowerCase().replace(/ +/g, '-').replace(/[^-a-z0-9]+/g, '');
-        return '<a name="#' + name + '" href="#' + name + '"></a><' + type + '>' + line + '</' + type + '>';
+        return '<a name=' + name + ' href="#' + name + '"></a><' + type + '>' + line + '</' + type + '>';
     }
 
     // TODO: split up handling by line type

@@ -58,6 +58,7 @@ Differences
 Changelog
 ---------
 
+- 0.2.5 - fix heading anchors
 - 0.2.4 - fix table and code transitions, apply styling inside bullet lists
 - 0.2.3 - fix bullet list transition
 - 0.2.2 - try to add anchors to the section headings, better invalid option wording, `-fa` option
